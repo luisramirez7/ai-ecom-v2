@@ -42,6 +42,18 @@ model CartItem {
   @@map("cart_items")
 }
 
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  orders        Order[]
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
 model Order {
   id              String      @id @default(cuid())
   status          OrderStatus @default(PENDING)
@@ -54,6 +66,8 @@ model Order {
   shippingCost    Decimal     @db.Decimal(10, 2) @map("shipping_cost")
   paymentIntentId String?     @unique @map("payment_intent_id")
   paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  userId          String?     @map("user_id")
+  user            User?       @relation(fields: [userId], references: [id])
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
 

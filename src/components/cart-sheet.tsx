@@ -58,9 +58,6 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
         <SheetHeader className="px-0">
           <div className="flex items-center justify-between">
             <SheetTitle>Shopping Cart ({items.length})</SheetTitle>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </SheetHeader>
         

@@ -3,11 +3,36 @@ import { NextResponse } from "next/server";
 import { calculateShipping } from "@/lib/shipping";
 import { formatStripePrice } from "@/lib/stripe";
 import type { ShippingAddress } from "@/lib/shipping";
+import * as jose from 'jose';
+import { cookies } from 'next/headers';
 
-// Get all orders
-export async function GET() {
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined");
+}
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+
+// Get all orders (protected route)
+export async function GET(request: Request) {
   try {
+    console.log('GET /api/orders - Fetching orders');
+    const cookieStore = cookies();
+    const token = cookieStore.get('token')?.value;
+    
+    if (!token) {
+      console.log('No token found');
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    // Verify token and get user ID
+    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+    console.log('Token verified, userId:', payload.userId);
+    
     const orders = await prisma.order.findMany({
+      where: { userId: payload.userId as string },
       include: {
         items: {
           include: {
@@ -17,10 +42,13 @@ export async function GET() {
       }
     });
 
+    console.log('Found orders:', orders.length);
+
     // Convert Decimal fields to regular numbers for JSON serialization
     const serializedOrders = orders.map(order => ({
       ...order,
       total: Number(order.total),
+      shippingCost: Number(order.shippingCost),
       items: order.items.map(item => ({
         ...item,
         price: Number(item.price),
@@ -31,6 +59,7 @@ export async function GET() {
       }))
     }));
 
+    console.log('Returning serialized orders');
     return NextResponse.json(serializedOrders);
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -68,6 +97,23 @@ export async function POST(request: Request) {
     // Calculate total including shipping
     const total = subtotal + shippingCost;
 
+    let userId: string | undefined;
+
+    // Get token from cookie
+    const cookieStore = cookies();
+    const token = cookieStore.get('token')?.value;
+
+    // If token exists, verify it and get user ID
+    if (token) {
+      try {
+        const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+        userId = payload.userId as string;
+      } catch (error) {
+        console.error("Invalid token:", error);
+        // Continue with guest checkout if token is invalid
+      }
+    }
+
     // Create order and order items in a transaction
     const order = await prisma.$transaction(async (prisma) => {
       // Create the order
@@ -80,6 +126,7 @@ export async function POST(request: Request) {
           shippingAddress,
           shippingMethod,
           shippingCost,
+          userId, // Will be null for guest users
           items: {
             create: cartItems.map(item => ({
               productId: item.product_id,

@@ -5,6 +5,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/lib/cart";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/lib/auth";
+import { PHProvider, PostHogPageview } from "@/providers/posthog-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,14 +33,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <CartProvider>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <Toaster />
-        </CartProvider>
+        <PHProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              <PostHogPageview />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <Toaster />
+            </CartProvider>
+          </AuthProvider>
+        </PHProvider>
       </body>
     </html>
   );
