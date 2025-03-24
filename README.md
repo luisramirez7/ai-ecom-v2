@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BikeMounts Ecommerce Application
 
-## Getting Started
+This is an ecommerce application for selling share bike phone mounts, built with Next.js, ShadCN, TailwindCSS, Prisma ORM, and Supabase.
 
-First, run the development server:
+## Technologies Used
+
+- **Next.js**: React framework for building the frontend
+- **ShadCN**: UI component library 
+- **TailwindCSS**: Utility-first CSS framework
+- **Prisma ORM**: Database ORM for TypeScript
+- **Supabase**: Backend as a service (BaaS) for auth, database, and storage
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+- PostgreSQL database (local or via Supabase)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd econ-v2
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Copy the example environment file and update with your credentials:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Update the `.env` file with your Supabase URL and anon key, and PostgreSQL database URL.
+
+5. Run Prisma migrations:
+   ```bash
+   npx prisma migrate dev
+   ```
+
+6. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+The application will be available at `http://localhost:3000`.
+
+## Database Schema
+
+The application uses the following database schema:
+
+- **Product**: Information about individual products
+- **Category**: Product categories
+- **User**: User information for authentication
+- **Order**: Order details
+- **OrderItem**: Individual items within an order
+
+## Features
+
+- Browse and search products
+- Product categories
+- Shopping cart functionality
+- User authentication
+- Order processing
+- Admin dashboard (coming soon)
+
+## Development
+
+To add new components from ShadCN:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx shadcn add [component-name]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To update the database schema:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Modify the schema in `prisma/schema.prisma`
+2. Run `npx prisma migrate dev` to generate and apply migrations
+3. Run `npx prisma generate` to update the Prisma client
 
 ## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

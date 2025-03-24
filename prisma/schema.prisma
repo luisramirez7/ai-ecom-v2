@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String     @id @default(cuid())
+  name        String
+  description String
+  price       Decimal    @db.Decimal(10, 2)
+  inventory   Int        @default(0)
+  imageUrl    String?    @map("image_url")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  categoryId  String?    @map("category_id")
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  category    Category?  @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
+
+model Category {
+  id          String    @id
+  name        String
+  description String?
+  products    Product[]
+
+  @@map("categories")
+}
+
+model CartItem {
+  id         String  @id
+  product_id String
+  quantity   Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@map("cart_items")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  status          OrderStatus @default(PENDING)
+  total           Decimal     @db.Decimal(10, 2)
+  items           OrderItem[]
+  customerEmail   String      @map("customer_email")
+  customerName    String      @map("customer_name")
+  shippingAddress Json        @map("shipping_address")
+  shippingMethod  String      @map("shipping_method")
+  shippingCost    Decimal     @db.Decimal(10, 2) @map("shipping_cost")
+  paymentIntentId String?     @unique @map("payment_intent_id")
+  paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String   @map("order_id")
+  productId String   @map("product_id")
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+} 
